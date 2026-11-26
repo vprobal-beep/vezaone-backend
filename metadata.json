@@ -1,0 +1,6 @@
+{
+  "name": "Meridian — Web App Wireframe",
+  "description": "Interactive web application wireframe built strictly with shadcn/ui components, featuring workspace navigation, data tables, detail drawers, command palette, and configuration views.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
