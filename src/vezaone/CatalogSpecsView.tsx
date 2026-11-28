@@ -94,19 +94,29 @@ export function CatalogSpecsView() {
     {
       key: "sku",
       header: "SKU / Part #",
-      className: "w-32 font-mono text-xs text-muted-foreground tabular-nums",
+      className:
+        "hidden xl:table-cell w-32 font-mono text-xs text-muted-foreground tabular-nums",
       render: (row) => row.sku,
     },
     {
       key: "name",
       header: "Product & Model",
+      className: "whitespace-normal",
       render: (row) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium text-foreground">
             {row.manufacturer} · {row.name}
           </span>
           <span className="text-xs text-muted-foreground">
-            Model: {row.model} · Updated {row.updatedAt}
+            Model: {row.model}
+            <span className="xl:hidden font-mono"> · SKU: {row.sku}</span>
+            {row.standards.length > 0 && (
+              <span className="xl:hidden font-mono">
+                {" "}
+                · {row.standards.join(" / ")}
+              </span>
+            )}
+            <span> · Updated {row.updatedAt}</span>
           </span>
         </div>
       ),
@@ -114,6 +124,7 @@ export function CatalogSpecsView() {
     {
       key: "category",
       header: "Category & Type",
+      className: "whitespace-normal",
       render: (row) => (
         <div className="flex flex-col">
           <span className="text-sm text-foreground">{row.category}</span>
@@ -126,7 +137,7 @@ export function CatalogSpecsView() {
     {
       key: "standards",
       header: "Standards",
-      className: "font-mono text-xs text-muted-foreground",
+      className: "hidden xl:table-cell font-mono text-xs text-muted-foreground",
       render: (row) =>
         row.standards.length > 0 ? row.standards.join(" · ") : "—",
     },
@@ -146,7 +157,7 @@ export function CatalogSpecsView() {
       key: "viewDetails",
       header: "",
       align: "right",
-      className: "w-32",
+      className: "w-28",
       render: (row) => (
         <Button
           type="button"
@@ -281,6 +292,61 @@ export function CatalogSpecsView() {
           setStandardFilter("all")
         }}
         onRowClick={(row) => setEditingProductId(row.id)}
+        renderMobileRow={(row) => (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1 min-w-0">
+              <div className="text-sm font-medium text-foreground">
+                {row.manufacturer} · {row.name}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                <span>Model: {row.model}</span>
+                <span aria-hidden="true"> · </span>
+                <span className="font-mono tabular-nums">SKU: {row.sku}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                <span>{row.category}</span>
+                <span aria-hidden="true"> · </span>
+                <span>{row.productType}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs pt-0.5">
+                <span className="font-medium text-foreground">
+                  {row.stewardship}
+                </span>
+                <span className="text-muted-foreground" aria-hidden="true">
+                  ·
+                </span>
+                <span className="text-muted-foreground">
+                  {formatLifecycleLabel(row.lifecycle)}
+                </span>
+                {row.standards.length > 0 && (
+                  <>
+                    <span className="text-muted-foreground" aria-hidden="true">
+                      ·
+                    </span>
+                    <span className="font-mono text-muted-foreground">
+                      {row.standards.join(" / ")}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto whitespace-nowrap"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setEditingProductId(row.id)
+                }}
+              >
+                View Details
+              </Button>
+            </div>
+          </div>
+        )}
         bulkActionLabel="Delete Selected"
         onBulkAction={(ids) => {
           setProducts((prev) => prev.filter((p) => !ids.includes(p.id)))

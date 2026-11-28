@@ -62,6 +62,7 @@ interface ResourceTableProps<T extends { id: string }> {
   toolbarExtras?: React.ReactNode
   hasExtraFilters?: boolean
   onResetExtraFilters?: () => void
+  renderMobileRow?: (row: T) => React.ReactNode
 }
 
 export function ResourceTable<T extends { id: string }>({
@@ -85,6 +86,7 @@ export function ResourceTable<T extends { id: string }>({
   toolbarExtras,
   hasExtraFilters = false,
   onResetExtraFilters,
+  renderMobileRow,
 }: ResourceTableProps<T>) {
   const [search, setSearch] = React.useState("")
   const [filterVal, setFilterVal] = React.useState("all")
@@ -242,7 +244,77 @@ export function ResourceTable<T extends { id: string }>({
             </div>
           </CardContent>
         ) : (
-          <Table>
+          <>
+            {/* Responsive Stacked List (< lg) — zero horizontal scrolling */}
+            <div className="divide-y divide-border lg:hidden">
+              {selectable && effectiveRows.length > 0 && (
+                <div className="flex items-center justify-between px-4 py-2.5 bg-muted/30">
+                  <label className="flex items-center gap-2.5 text-xs font-medium text-muted-foreground cursor-pointer">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={(checked) => toggleAll(Boolean(checked))}
+                      aria-label="Select all rows"
+                    />
+                    <span>Select all ({effectiveRows.length})</span>
+                  </label>
+                </div>
+              )}
+              {effectiveRows.map((row) => {
+                const isSelected = selectedIds.includes(row.id)
+                return (
+                  <div
+                    key={row.id}
+                    data-state={isSelected ? "selected" : undefined}
+                    className={`flex items-start gap-3 p-4 transition-colors data-[state=selected]:bg-muted ${
+                      onRowClick ? "cursor-pointer hover:bg-muted/40" : ""
+                    }`}
+                    onClick={() => onRowClick?.(row)}
+                  >
+                    {selectable && (
+                      <div
+                        className="pt-0.5 shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) =>
+                            toggleOne(row.id, Boolean(checked))
+                          }
+                          aria-label={`Select row ${row.id}`}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      {renderMobileRow ? (
+                        renderMobileRow(row)
+                      ) : (
+                        <div className="flex flex-col gap-1.5">
+                          {columns.map((col) => (
+                            <div
+                              key={String(col.key)}
+                              className="flex items-baseline justify-between gap-3 text-sm"
+                            >
+                              {col.header && (
+                                <span className="text-xs text-muted-foreground shrink-0">
+                                  {col.header}
+                                </span>
+                              )}
+                              <div className="min-w-0 text-right">
+                                {col.render(row)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop Table (>= lg) */}
+            <div className="hidden lg:block">
+              <Table>
             <TableHeader>
               <TableRow>
                 {selectable && (
@@ -339,6 +411,8 @@ export function ResourceTable<T extends { id: string }>({
               })}
             </TableBody>
           </Table>
+            </div>
+          </>
         )}
       </Card>
     </div>

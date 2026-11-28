@@ -300,7 +300,7 @@ export function WireframeShell({
           <SidebarRail />
         </Sidebar>
 
-        <SidebarInset>
+        <SidebarInset className="min-w-0">
           <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b px-4 sm:px-6">
             <div className="flex items-center gap-2 min-w-0">
               <SidebarTrigger className="-ml-1 shrink-0" />
